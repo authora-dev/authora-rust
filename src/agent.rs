@@ -23,6 +23,7 @@ pub struct AgentOptions {
     pub base_url: Option<String>,
     pub timeout: Option<Duration>,
     pub permissions_cache_ttl: Option<Duration>,
+    pub delegation_token: Option<String>,
 }
 
 pub struct SignedResponse<T> {
@@ -87,6 +88,7 @@ pub struct AgentRuntime {
     base_url: String,
     client: Client,
     cache_ttl: Duration,
+    delegation_token: Option<String>,
     cache: Arc<RwLock<PermissionsCache>>,
 }
 
@@ -111,6 +113,7 @@ impl AgentRuntime {
             base_url,
             client,
             cache_ttl: opts.permissions_cache_ttl.unwrap_or(DEFAULT_CACHE_TTL),
+            delegation_token: opts.delegation_token,
             cache: Arc::new(RwLock::new(PermissionsCache {
                 allow: None,
                 deny: None,
@@ -307,13 +310,15 @@ impl AgentRuntime {
             .id
             .unwrap_or_else(|| serde_json::json!(format!("{}-{}", self.agent_id, timestamp)));
 
+        let token = params.delegation_token.as_ref().or(self.delegation_token.as_ref());
+
         let mut authora_meta = serde_json::json!({
             "agentId": self.agent_id,
             "signature": inner_sig,
             "timestamp": timestamp,
         });
-        if let Some(token) = &params.delegation_token {
-            authora_meta["delegationToken"] = serde_json::json!(token);
+        if let Some(t) = token {
+            authora_meta["delegationToken"] = serde_json::json!(t);
         }
 
         let body = serde_json::json!({

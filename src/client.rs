@@ -79,6 +79,21 @@ impl AuthoraClient {
         AgentRuntime::new(resolved)
     }
 
+    pub fn load_delegated_agent(&self, opts: AgentOptions) -> Result<AgentRuntime, AuthoraError> {
+        if opts.delegation_token.is_none() {
+            return Err(AuthoraError::Api {
+                status_code: 0,
+                message: "delegation_token is required".into(),
+                code: None,
+            });
+        }
+        let resolved = AgentOptions {
+            base_url: opts.base_url.or_else(|| Some(self.base_url.clone())),
+            ..opts
+        };
+        AgentRuntime::new(resolved)
+    }
+
     pub async fn verify_agent(
         &self,
         agent_id: &str,

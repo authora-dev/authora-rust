@@ -26,6 +26,14 @@ impl HttpClient {
         })
     }
 
+    pub fn stream_url(&self, path: &str) -> String {
+        format!("{}{}", self.base_url, path)
+    }
+
+    pub fn get_api_key(&self) -> &str {
+        &self.api_key
+    }
+
     fn request(&self, method: Method, path: &str) -> RequestBuilder {
         let url = format!("{}{}", self.base_url, path);
         self.client

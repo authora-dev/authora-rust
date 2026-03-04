@@ -155,6 +155,7 @@ pub struct Role {
     pub parent_role_id: Option<String>,
     pub stage: Option<String>,
     pub max_session_duration: Option<i32>,
+    pub is_builtin: Option<bool>,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
 }

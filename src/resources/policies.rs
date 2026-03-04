@@ -8,19 +8,16 @@ use crate::types::{
     UpdatePolicyInput,
 };
 
-/// Operations on Policy resources.
 #[derive(Debug, Clone)]
 pub struct PoliciesResource {
     pub(crate) http: Arc<HttpClient>,
 }
 
 impl PoliciesResource {
-    /// Create a new policy.
     pub async fn create(&self, input: CreatePolicyInput) -> Result<Policy, AuthoraError> {
         self.http.post("/policies", &input).await
     }
 
-    /// List policies.
     pub async fn list(
         &self,
         input: ListPoliciesInput,
@@ -28,7 +25,6 @@ impl PoliciesResource {
         self.http.get_with_query("/policies", &input).await
     }
 
-    /// Update a policy.
     pub async fn update(
         &self,
         policy_id: &str,
@@ -39,12 +35,10 @@ impl PoliciesResource {
             .await
     }
 
-    /// Delete a policy.
     pub async fn delete(&self, policy_id: &str) -> Result<SuccessResponse, AuthoraError> {
         self.http.delete(&format!("/policies/{policy_id}")).await
     }
 
-    /// Simulate a policy evaluation.
     pub async fn simulate(
         &self,
         input: SimulatePolicyInput,
@@ -52,7 +46,6 @@ impl PoliciesResource {
         self.http.post("/policies/simulate", &input).await
     }
 
-    /// Evaluate policies for a given request.
     pub async fn evaluate(
         &self,
         input: EvaluatePolicyInput,

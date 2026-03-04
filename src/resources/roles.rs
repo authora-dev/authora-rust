@@ -7,29 +7,24 @@ use crate::types::{
     PaginatedResponse, Role, SuccessResponse, UpdateRoleInput,
 };
 
-/// Operations on Role resources.
 #[derive(Debug, Clone)]
 pub struct RolesResource {
     pub(crate) http: Arc<HttpClient>,
 }
 
 impl RolesResource {
-    /// Create a new role.
     pub async fn create(&self, input: CreateRoleInput) -> Result<Role, AuthoraError> {
         self.http.post("/roles", &input).await
     }
 
-    /// List roles with optional filters.
     pub async fn list(&self, input: ListRolesInput) -> Result<PaginatedResponse<Role>, AuthoraError> {
         self.http.get_with_query("/roles", &input).await
     }
 
-    /// Get a role by ID.
     pub async fn get(&self, role_id: &str) -> Result<Role, AuthoraError> {
         self.http.get(&format!("/roles/{role_id}")).await
     }
 
-    /// Update a role.
     pub async fn update(
         &self,
         role_id: &str,
@@ -38,12 +33,10 @@ impl RolesResource {
         self.http.patch(&format!("/roles/{role_id}"), &input).await
     }
 
-    /// Delete a role.
     pub async fn delete(&self, role_id: &str) -> Result<SuccessResponse, AuthoraError> {
         self.http.delete(&format!("/roles/{role_id}")).await
     }
 
-    /// Assign a role to an agent.
     pub async fn assign(
         &self,
         agent_id: &str,
@@ -54,7 +47,6 @@ impl RolesResource {
             .await
     }
 
-    /// Unassign a role from an agent.
     pub async fn unassign(
         &self,
         agent_id: &str,
@@ -65,8 +57,6 @@ impl RolesResource {
             .await
     }
 
-    /// List roles assigned to an agent.
-    /// The API returns `{ agentId: "...", roles: [...] }`.
     pub async fn list_for_agent(
         &self,
         agent_id: &str,

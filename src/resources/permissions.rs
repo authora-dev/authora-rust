@@ -7,14 +7,12 @@ use crate::types::{
     EffectivePermission, PermissionCheckResult,
 };
 
-/// Operations for permission checks.
 #[derive(Debug, Clone)]
 pub struct PermissionsResource {
     pub(crate) http: Arc<HttpClient>,
 }
 
 impl PermissionsResource {
-    /// Check a single permission.
     pub async fn check(
         &self,
         input: CheckPermissionInput,
@@ -22,7 +20,6 @@ impl PermissionsResource {
         self.http.post("/permissions/check", &input).await
     }
 
-    /// Check multiple permissions in a batch.
     pub async fn check_batch(
         &self,
         input: BatchCheckPermissionInput,
@@ -30,7 +27,6 @@ impl PermissionsResource {
         self.http.post("/permissions/check-batch", &input).await
     }
 
-    /// Get effective permissions for an agent.
     pub async fn effective(
         &self,
         agent_id: &str,

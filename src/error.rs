@@ -1,6 +1,5 @@
 use serde::Deserialize;
 
-/// Error type for all Authora SDK operations.
 #[derive(Debug, thiserror::Error)]
 pub enum AuthoraError {
     #[error("API error ({status_code}): {message}")]
@@ -27,9 +26,11 @@ pub enum AuthoraError {
 
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
+
+    #[error("Crypto error: {0}")]
+    Crypto(String),
 }
 
-/// Shape of error responses returned by the Authora API.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ApiErrorBody {

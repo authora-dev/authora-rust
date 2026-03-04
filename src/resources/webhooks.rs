@@ -7,19 +7,16 @@ use crate::types::{
     Webhook,
 };
 
-/// Operations on Webhook resources.
 #[derive(Debug, Clone)]
 pub struct WebhooksResource {
     pub(crate) http: Arc<HttpClient>,
 }
 
 impl WebhooksResource {
-    /// Create a new webhook.
     pub async fn create(&self, input: CreateWebhookInput) -> Result<Webhook, AuthoraError> {
         self.http.post("/webhooks", &input).await
     }
 
-    /// List webhooks.
     pub async fn list(
         &self,
         input: ListWebhooksInput,
@@ -27,7 +24,6 @@ impl WebhooksResource {
         self.http.get_with_query("/webhooks", &input).await
     }
 
-    /// Update a webhook.
     pub async fn update(
         &self,
         webhook_id: &str,
@@ -38,7 +34,6 @@ impl WebhooksResource {
             .await
     }
 
-    /// Delete a webhook.
     pub async fn delete(&self, webhook_id: &str) -> Result<SuccessResponse, AuthoraError> {
         self.http.delete(&format!("/webhooks/{webhook_id}")).await
     }

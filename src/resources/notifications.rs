@@ -7,14 +7,12 @@ use crate::types::{
     UnreadCount, UnreadCountInput,
 };
 
-/// Operations on Notification resources.
 #[derive(Debug, Clone)]
 pub struct NotificationsResource {
     pub(crate) http: Arc<HttpClient>,
 }
 
 impl NotificationsResource {
-    /// List notifications.
     pub async fn list(
         &self,
         input: ListNotificationsInput,
@@ -22,7 +20,6 @@ impl NotificationsResource {
         self.http.get_with_query("/notifications", &input).await
     }
 
-    /// Get unread notification count.
     pub async fn unread_count(
         &self,
         input: UnreadCountInput,
@@ -32,7 +29,6 @@ impl NotificationsResource {
             .await
     }
 
-    /// Mark a single notification as read.
     pub async fn mark_read(
         &self,
         notification_id: &str,
@@ -43,7 +39,6 @@ impl NotificationsResource {
             .await
     }
 
-    /// Mark all notifications as read.
     pub async fn mark_all_read(
         &self,
         input: MarkAllReadInput,

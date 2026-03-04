@@ -1,11 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-// ---------------------------------------------------------------------------
-// Common / Pagination
-// ---------------------------------------------------------------------------
-
-/// Paginated list response wrapper.
-/// After envelope unwrapping, the HTTP layer returns `{ "items": [...], "total": N, ... }`.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PaginatedResponse<T> {
@@ -16,17 +10,12 @@ pub struct PaginatedResponse<T> {
     pub has_more: Option<bool>,
 }
 
-/// Generic success message response.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SuccessResponse {
     pub success: Option<bool>,
     pub message: Option<String>,
 }
-
-// ---------------------------------------------------------------------------
-// Agents
-// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -108,10 +97,6 @@ pub struct AgentVerification {
     pub expires_at: Option<String>,
 }
 
-// ---------------------------------------------------------------------------
-// Roles
-// ---------------------------------------------------------------------------
-
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateRoleInput {
@@ -174,10 +159,6 @@ pub struct Role {
     pub updated_at: Option<String>,
 }
 
-// ---------------------------------------------------------------------------
-// Agent Role Assignments
-// ---------------------------------------------------------------------------
-
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct AssignRoleInput {
@@ -201,18 +182,12 @@ pub struct AgentRoleAssignment {
     pub role: Option<Role>,
 }
 
-/// Response from GET /agents/:agentId/roles.
-/// The API returns { agentId: "...", roles: [...] }.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AgentRolesResponse {
     pub agent_id: Option<String>,
     pub roles: Vec<Role>,
 }
-
-// ---------------------------------------------------------------------------
-// Permission Checks
-// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -273,10 +248,6 @@ pub struct EffectivePermission {
     pub role_name: Option<String>,
     pub conditions: Option<serde_json::Value>,
 }
-
-// ---------------------------------------------------------------------------
-// Delegations
-// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -345,10 +316,6 @@ pub struct DelegationVerification {
     pub chain: Option<Vec<String>>,
     pub reason: Option<String>,
 }
-
-// ---------------------------------------------------------------------------
-// Policies
-// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -465,10 +432,6 @@ pub struct PolicyEvaluationResult {
     pub reason: Option<String>,
 }
 
-// ---------------------------------------------------------------------------
-// MCP
-// ---------------------------------------------------------------------------
-
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct RegisterMcpServerInput {
@@ -578,10 +541,6 @@ pub struct McpProxyResult {
     pub error: Option<serde_json::Value>,
 }
 
-// ---------------------------------------------------------------------------
-// Audit
-// ---------------------------------------------------------------------------
-
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ListAuditEventsInput {
@@ -677,7 +636,6 @@ pub struct AuditMetrics {
     pub top_resources: Option<Vec<serde_json::Value>>,
 }
 
-/// A single row of audit metrics data (for array-style responses).
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AuditMetricRow {
@@ -690,10 +648,6 @@ pub struct AuditMetricRow {
     pub denied_actions: Option<u64>,
     pub unique_resources: Option<u64>,
 }
-
-// ---------------------------------------------------------------------------
-// Notifications
-// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -750,10 +704,6 @@ pub struct UnreadCount {
     pub unread_count: Option<u64>,
 }
 
-// ---------------------------------------------------------------------------
-// Webhooks
-// ---------------------------------------------------------------------------
-
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateWebhookInput {
@@ -798,10 +748,6 @@ pub struct Webhook {
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
 }
-
-// ---------------------------------------------------------------------------
-// Alerts
-// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -852,10 +798,6 @@ pub struct Alert {
     pub updated_at: Option<String>,
 }
 
-// ---------------------------------------------------------------------------
-// API Keys
-// ---------------------------------------------------------------------------
-
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateApiKeyInput {
@@ -894,10 +836,6 @@ pub struct ApiKey {
     pub created_at: Option<String>,
 }
 
-// ---------------------------------------------------------------------------
-// Organizations
-// ---------------------------------------------------------------------------
-
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateOrganizationInput {
@@ -934,10 +872,6 @@ pub struct Organization {
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
 }
-
-// ---------------------------------------------------------------------------
-// Workspaces
-// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]

@@ -1,6 +1,8 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use crate::agent::{AgentOptions, AgentRuntime};
+use crate::crypto::{generate_key_pair, KeyPair};
 use crate::error::AuthoraError;
 use crate::http::HttpClient;
 use crate::resources::agents::AgentsResource;
@@ -16,29 +18,24 @@ use crate::resources::policies::PoliciesResource;
 use crate::resources::roles::RolesResource;
 use crate::resources::webhooks::WebhooksResource;
 use crate::resources::workspaces::WorkspacesResource;
+use crate::types::{
+    ActivateAgentInput, Agent, AgentVerification, CreateAgentInput,
+};
 
 const DEFAULT_BASE_URL: &str = "https://api.authora.dev/api/v1";
 const DEFAULT_TIMEOUT_SECS: u64 = 30;
 
-/// The main client for interacting with the Authora API.
-///
-/// Create one via [`AuthoraClient::new`] (defaults) or [`AuthoraClient::builder`]
-/// (custom configuration).
 #[derive(Debug, Clone)]
 pub struct AuthoraClient {
     http: Arc<HttpClient>,
+    base_url: String,
 }
 
 impl AuthoraClient {
-    /// Create a client with default settings.
-    ///
-    /// Uses `https://api.authora.dev/api/v1` as the base URL and a 30-second
-    /// request timeout.
     pub fn new(api_key: &str) -> Result<Self, AuthoraError> {
         Self::builder(api_key).build()
     }
 
-    /// Return a builder for fine-grained configuration.
     #[must_use]
     pub fn builder(api_key: &str) -> AuthoraClientBuilder {
         AuthoraClientBuilder {
@@ -48,93 +45,121 @@ impl AuthoraClient {
         }
     }
 
-    // -- resource accessors ---------------------------------------------------
+    pub async fn create_agent(
+        &self,
+        input: CreateAgentInput,
+    ) -> Result<(Agent, KeyPair), AuthoraError> {
+        let agent: Agent = self.http.post("/agents", &input).await?;
+        let kp = generate_key_pair();
+        let agent_id = agent
+            .id
+            .as_deref()
+            .ok_or_else(|| AuthoraError::Api {
+                status_code: 0,
+                message: "missing agent id in response".into(),
+                code: None,
+            })?;
+        let activated: Agent = self
+            .http
+            .post(
+                &format!("/agents/{agent_id}/activate"),
+                &ActivateAgentInput {
+                    public_key: kp.public_key.clone(),
+                },
+            )
+            .await?;
+        Ok((activated, kp))
+    }
 
-    /// Access agent operations.
+    pub fn load_agent(&self, opts: AgentOptions) -> Result<AgentRuntime, AuthoraError> {
+        let resolved = AgentOptions {
+            base_url: opts.base_url.or_else(|| Some(self.base_url.clone())),
+            ..opts
+        };
+        AgentRuntime::new(resolved)
+    }
+
+    pub async fn verify_agent(
+        &self,
+        agent_id: &str,
+    ) -> Result<AgentVerification, AuthoraError> {
+        self.http
+            .get(&format!("/agents/{agent_id}/verify"))
+            .await
+    }
+
     pub fn agents(&self) -> AgentsResource {
         AgentsResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access role operations.
     pub fn roles(&self) -> RolesResource {
         RolesResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access permission-check operations.
     pub fn permissions(&self) -> PermissionsResource {
         PermissionsResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access delegation operations.
     pub fn delegations(&self) -> DelegationsResource {
         DelegationsResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access policy operations.
     pub fn policies(&self) -> PoliciesResource {
         PoliciesResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access MCP operations.
     pub fn mcp(&self) -> McpResource {
         McpResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access audit operations.
     pub fn audit(&self) -> AuditResource {
         AuditResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access notification operations.
     pub fn notifications(&self) -> NotificationsResource {
         NotificationsResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access webhook operations.
     pub fn webhooks(&self) -> WebhooksResource {
         WebhooksResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access alert operations.
     pub fn alerts(&self) -> AlertsResource {
         AlertsResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access API key operations.
     pub fn api_keys(&self) -> ApiKeysResource {
         ApiKeysResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access organization operations.
     pub fn organizations(&self) -> OrganizationsResource {
         OrganizationsResource {
             http: Arc::clone(&self.http),
         }
     }
 
-    /// Access workspace operations.
     pub fn workspaces(&self) -> WorkspacesResource {
         WorkspacesResource {
             http: Arc::clone(&self.http),
@@ -142,7 +167,6 @@ impl AuthoraClient {
     }
 }
 
-/// Builder for [`AuthoraClient`].
 #[must_use]
 #[derive(Debug)]
 pub struct AuthoraClientBuilder {
@@ -152,23 +176,21 @@ pub struct AuthoraClientBuilder {
 }
 
 impl AuthoraClientBuilder {
-    /// Override the base URL (default: `https://api.authora.dev/api/v1`).
     pub fn base_url(mut self, url: &str) -> Self {
         self.base_url = url.to_string();
         self
     }
 
-    /// Override the request timeout (default: 30 s).
     pub fn timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;
         self
     }
 
-    /// Build the client.
     pub fn build(self) -> Result<AuthoraClient, AuthoraError> {
         let http = HttpClient::new(&self.api_key, &self.base_url, self.timeout)?;
         Ok(AuthoraClient {
             http: Arc::new(http),
+            base_url: self.base_url,
         })
     }
 }

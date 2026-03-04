@@ -5,7 +5,6 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::error::{ApiErrorBody, AuthoraError};
 
-/// Low-level HTTP client wrapper for the Authora API.
 #[derive(Debug, Clone)]
 pub(crate) struct HttpClient {
     client: Client,
@@ -27,8 +26,6 @@ impl HttpClient {
         })
     }
 
-    /// Build a request with auth headers but WITHOUT Content-Type.
-    /// Content-Type is only set on methods that send a body.
     fn request(&self, method: Method, path: &str) -> RequestBuilder {
         let url = format!("{}{}", self.base_url, path);
         self.client
@@ -37,7 +34,6 @@ impl HttpClient {
             .header("Accept", "application/json")
     }
 
-    /// Build a request that will carry a JSON body (sets Content-Type).
     fn request_with_body(&self, method: Method, path: &str) -> RequestBuilder {
         self.request(method, path)
             .header("Content-Type", "application/json")
@@ -70,7 +66,6 @@ impl HttpClient {
     }
 
     pub async fn post_empty<R: DeserializeOwned>(&self, path: &str) -> Result<R, AuthoraError> {
-        // POST without body -- do NOT set Content-Type
         let resp = self.request(Method::POST, path).send().await;
         self.handle_response(resp).await
     }
@@ -88,7 +83,6 @@ impl HttpClient {
     }
 
     pub async fn delete<R: DeserializeOwned>(&self, path: &str) -> Result<R, AuthoraError> {
-        // DELETE without body -- do NOT set Content-Type
         let resp = self.request(Method::DELETE, path).send().await;
         self.handle_response(resp).await
     }
@@ -112,7 +106,6 @@ impl HttpClient {
             if body.is_empty() || body == "null" {
                 return serde_json::from_str("{}").map_err(AuthoraError::Serialization);
             }
-            // Unwrap the backend's { "data": T } response envelope
             let unwrapped = unwrap_response(&body);
             return serde_json::from_str(&unwrapped).map_err(AuthoraError::Serialization);
         }
@@ -144,17 +137,7 @@ impl HttpClient {
     }
 }
 
-/// Unwrap the standard backend response envelope.
-///
-/// The Authora API returns responses in one of these shapes:
-/// - `{ "data": T }` for single entities
-/// - `{ "data": [...], "pagination": { "total", "page", "limit" } }` for lists
-/// - `{ "data": [...], "meta": { "total", "page", "limit" } }` for some lists
-///
-/// For paginated lists, returns `{ "items": [...], "total": N, ... }`.
-/// For single entities, returns the unwrapped `T`.
 fn unwrap_response(body: &str) -> String {
-    // Try to parse as an envelope with a "data" field
     let parsed: serde_json::Value = match serde_json::from_str(body) {
         Ok(v) => v,
         Err(_) => return body.to_string(),
@@ -170,12 +153,10 @@ fn unwrap_response(body: &str) -> String {
         None => return body.to_string(),
     };
 
-    // Get pagination from either "pagination" or "meta"
     let pagination = obj.get("pagination").or_else(|| obj.get("meta"));
 
     if let serde_json::Value::Array(_) = data {
         if let Some(pg) = pagination {
-            // Build paginated list
             let total = pg.get("total").and_then(|v| v.as_u64()).unwrap_or(0);
             let page = pg.get("page").and_then(|v| v.as_u64()).unwrap_or(0);
             let limit = pg.get("limit").and_then(|v| v.as_u64()).unwrap_or(0);
@@ -187,13 +168,11 @@ fn unwrap_response(body: &str) -> String {
             return serde_json::to_string(&serde_json::Value::Object(result))
                 .unwrap_or_else(|_| body.to_string());
         }
-        // Array without pagination
         let mut result = serde_json::Map::new();
         result.insert("items".to_string(), data.clone());
         return serde_json::to_string(&serde_json::Value::Object(result))
             .unwrap_or_else(|_| body.to_string());
     }
 
-    // Single entity: return unwrapped data
     serde_json::to_string(data).unwrap_or_else(|_| body.to_string())
 }

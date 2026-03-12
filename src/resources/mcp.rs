@@ -3,8 +3,8 @@ use std::sync::Arc;
 use crate::error::AuthoraError;
 use crate::http::HttpClient;
 use crate::types::{
-    ListMcpServersInput, McpProxyInput, McpProxyResult, McpServer, McpTool, PaginatedResponse,
-    RegisterMcpServerInput, RegisterMcpToolInput, UpdateMcpServerInput,
+    ListMcpServersInput, McpProxyInput, McpProxyResult, McpServer, McpTool, McpToolDiscoveryResult,
+    PaginatedResponse, RegisterMcpServerInput, RegisterMcpToolInput, UpdateMcpServerInput,
 };
 
 #[derive(Debug, Clone)]
@@ -69,6 +69,15 @@ impl McpResource {
     ) -> Result<McpTool, AuthoraError> {
         self.http
             .post(&format!("/mcp/servers/{server_id}/tools"), &input)
+            .await
+    }
+
+    pub async fn discover_tools(
+        &self,
+        server_id: &str,
+    ) -> Result<McpToolDiscoveryResult, AuthoraError> {
+        self.http
+            .post_empty(&format!("/mcp/servers/{server_id}/discover"))
             .await
     }
 

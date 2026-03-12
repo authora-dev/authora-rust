@@ -10,6 +10,7 @@ use crate::resources::alerts::AlertsResource;
 use crate::resources::api_keys::ApiKeysResource;
 use crate::resources::audit::AuditResource;
 use crate::resources::delegations::DelegationsResource;
+use crate::resources::user_delegations::UserDelegationsResource;
 use crate::resources::mcp::McpResource;
 use crate::resources::notifications::NotificationsResource;
 use crate::resources::organizations::OrganizationsResource;
@@ -18,6 +19,8 @@ use crate::resources::policies::PoliciesResource;
 use crate::resources::roles::RolesResource;
 use crate::resources::webhooks::WebhooksResource;
 use crate::resources::workspaces::WorkspacesResource;
+use crate::resources::approvals::ApprovalsResource;
+use crate::resources::credits::CreditsResource;
 use crate::types::{
     ActivateAgentInput, Agent, AgentVerification, CreateAgentInput,
 };
@@ -127,6 +130,12 @@ impl AuthoraClient {
         }
     }
 
+    pub fn user_delegations(&self) -> UserDelegationsResource {
+        UserDelegationsResource {
+            http: Arc::clone(&self.http),
+        }
+    }
+
     pub fn policies(&self) -> PoliciesResource {
         PoliciesResource {
             http: Arc::clone(&self.http),
@@ -177,6 +186,18 @@ impl AuthoraClient {
 
     pub fn workspaces(&self) -> WorkspacesResource {
         WorkspacesResource {
+            http: Arc::clone(&self.http),
+        }
+    }
+
+    pub fn approvals(&self) -> ApprovalsResource {
+        ApprovalsResource {
+            http: Arc::clone(&self.http),
+        }
+    }
+
+    pub fn credits(&self) -> CreditsResource {
+        CreditsResource {
             http: Arc::clone(&self.http),
         }
     }

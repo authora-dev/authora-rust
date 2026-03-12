@@ -13,9 +13,22 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-authora = "0.1.0"
+authora = "0.2"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
+
+## Find your credentials
+
+Several SDK methods require identifiers that are generated when you sign up:
+
+| Value | Format | Where to find it |
+|---|---|---|
+| **API Key** | `authora_live_...` | [Account page](https://www.authora.dev/account) > API Keys tab |
+| **Workspace ID** | `ws_...` | [Account page](https://www.authora.dev/account) > Profile tab > SDK Quick Start |
+| **User ID** | `usr_...` | [Account page](https://www.authora.dev/account) > Profile tab > User ID |
+| **Organization ID** | `org_...` | [Account page](https://www.authora.dev/account) > Profile tab > Organization ID |
+
+The `created_by` parameter used when creating agents or API keys is your **User ID** (`usr_...`).
 
 ## Quick start
 
@@ -24,12 +37,12 @@ use authora::{AuthoraClient, types::CreateAgentInput};
 
 #[tokio::main]
 async fn main() -> Result<(), authora::AuthoraError> {
-    let client = AuthoraClient::new("authora_live_...")?;
+    let client = AuthoraClient::new("authora_live_...")?; // from Account > API Keys
 
     let agent = client.agents().create(CreateAgentInput {
-        workspace_id: "ws_123".into(),
+        workspace_id: "ws_...".into(),    // from Account > Profile
         name: "my-agent".into(),
-        created_by: "user_456".into(),
+        created_by: "usr_...".into(),     // your User ID
         ..Default::default()
     }).await?;
 
@@ -155,6 +168,80 @@ All methods return `Result<T, AuthoraError>`. The error enum covers:
 
 Rust structs use `snake_case` fields. Serde automatically maps them to/from `camelCase`
 for the Authora API via `#[serde(rename_all = "camelCase")]`.
+
+## Agent Runtime
+
+The `AgentRuntime` provides a full async agent runtime with Ed25519 signed requests, tokio `RwLock`-protected permission caching, delegation, and MCP tool calls.
+
+```rust
+use authora::{AuthoraClient, AgentRuntime, generate_key_pair};
+use authora::types::{CreateAgentInput, AgentOptions, ToolCallParams, DelegationConstraints};
+
+#[tokio::main]
+async fn main() -> Result<(), authora::AuthoraError> {
+    let client = AuthoraClient::new("authora_live_...")?;
+
+    // Create + activate an agent (generates Ed25519 keypair locally)
+    let (runtime, key_pair) = client.create_agent(CreateAgentInput {
+        workspace_id: "ws_...".into(),        // from Account > Profile
+        name: "data-processor".into(),
+        created_by: "usr_...".into(),         // your User ID
+        ..Default::default()
+    }).await?;
+
+    // All requests are Ed25519-signed automatically
+    let profile = runtime.get_profile().await?;
+    let doc = runtime.get_identity_document().await?;
+
+    // Server-side permission check
+    let result = runtime.check_permission("files:read", "read", None).await?;
+
+    // Client-side cached check (deny-first, 5-minute TTL, Arc<RwLock>)
+    if runtime.has_permission("mcp:server1:tool.query").await? {
+        let result = runtime.call_tool(ToolCallParams {
+            tool_name: "query".into(),
+            arguments: Some(serde_json::json!({"sql": "SELECT 1"})),
+            ..Default::default()
+        }).await?;
+    }
+
+    // Delegate permissions
+    let delegation = runtime.delegate(
+        "agent_...",
+        vec!["files:read".into()],
+        Some(DelegationConstraints { expires_in: Some("1h".into()), ..Default::default() }),
+    ).await?;
+
+    // Key rotation
+    let (updated, new_key_pair) = runtime.rotate_key().await?;
+
+    // Lifecycle
+    runtime.suspend().await?;
+    let (reactivated, fresh_key_pair) = runtime.reactivate().await?;
+    runtime.revoke().await?;
+
+    Ok(())
+}
+```
+
+## Cryptography
+
+Ed25519 key generation, signing, and verification via `ed25519_dalek`.
+
+```rust
+use authora::{generate_key_pair};
+use authora::crypto::{sign, verify, build_signature_payload, sha256_hash};
+
+// Generate Ed25519 keypair (base64url encoded)
+let key_pair = generate_key_pair();
+
+// Sign and verify
+let signature = sign("hello world", &key_pair.private_key)?;
+let valid = verify("hello world", &signature, &key_pair.public_key);
+
+// Build canonical signature payload
+let payload = build_signature_payload("POST", "/api/v1/agents", &timestamp, Some("{}"));
+```
 
 ## License
 

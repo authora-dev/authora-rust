@@ -165,6 +165,147 @@ pub struct Role {
     pub updated_at: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AssignRoleInput {
+    pub role_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub granted_by: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expires_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AgentRoleAssignment {
+    pub agent_id: Option<String>,
+    pub role_id: Option<String>,
+    pub granted_by: Option<String>,
+    pub expires_at: Option<String>,
+    pub assigned_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AgentRolesResponse {
+    pub agent_id: Option<String>,
+    pub roles: Option<Vec<Role>>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CheckPermissionInput {
+    pub agent_id: String,
+    pub resource: String,
+    pub action: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PermissionCheckResult {
+    pub allowed: Option<bool>,
+    pub reason: Option<String>,
+    pub matched_policies: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BatchCheckPermissionInput {
+    pub agent_id: String,
+    pub checks: Vec<BatchCheckItem>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BatchCheckItem {
+    pub resource: String,
+    pub action: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BatchPermissionCheckResult {
+    pub results: Option<Vec<PermissionCheckResult>>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EffectivePermission {
+    pub agent_id: Option<String>,
+    pub permissions: Option<Vec<String>>,
+    pub deny_permissions: Option<Vec<String>>,
+}
+
+// ── Delegation Types ───────────────────────────────────────────────
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Delegation {
+    pub id: Option<String>,
+    pub issuer_agent_id: Option<String>,
+    pub target_agent_id: Option<String>,
+    pub permissions: Option<Vec<String>>,
+    pub constraints: Option<serde_json::Value>,
+    pub parent_delegation_id: Option<String>,
+    pub status: Option<String>,
+    pub created_by: Option<String>,
+    pub revoked_by: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+    pub expires_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateDelegationInput {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_id: Option<String>,
+    pub issuer_agent_id: String,
+    pub target_agent_id: String,
+    pub permissions: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub constraints: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_delegation_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ListDelegationsInput {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub limit: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ListAgentDelegationsInput {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub direction: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub limit: Option<u64>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DelegationVerification {
+    pub valid: Option<bool>,
+    pub delegation: Option<Delegation>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VerifyDelegationInput {
+    pub delegation_id: String,
+}
+
 // ── User Delegation Types ──────────────────────────────────────────
 
 #[derive(Debug, Clone, Serialize)]

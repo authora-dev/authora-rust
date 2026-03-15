@@ -74,7 +74,7 @@ that borrows the underlying HTTP client:
 | `client.roles()`       | Roles + Assignments  | 8         |
 | `client.permissions()` | Permission Checks    | 3         |
 | `client.delegations()` | Delegations          | 6         |
-| `client.policies()`    | Policies             | 6         |
+| `client.policies()`    | Policies             | 12        |
 | `client.mcp()`         | MCP Servers / Tools  | 7         |
 | `client.audit()`       | Audit Events         | 4         |
 | `client.notifications()` | Notifications      | 4         |
@@ -83,8 +83,11 @@ that borrows the underlying HTTP client:
 | `client.api_keys()`    | API Keys             | 3         |
 | `client.organizations()` | Organizations      | 3         |
 | `client.workspaces()`  | Workspaces           | 3         |
+| `client.approvals()`  | Approval Challenges  | 13        |
+| `client.credits()`    | Credit Balance       | 3         |
+| `client.user_delegations()` | User Delegation Grants | 11  |
 
-**Total: 63 endpoints**
+**Total: 90 endpoints**
 
 ## Examples
 

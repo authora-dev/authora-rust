@@ -570,6 +570,44 @@ pub struct PolicyEvaluationResult {
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
+pub struct AttachPolicyInput {
+    pub policy_id: String,
+    pub target_type: String,
+    pub target_id: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PolicyAttachment {
+    pub id: Option<String>,
+    pub policy_id: Option<String>,
+    pub target_type: Option<String>,
+    pub target_id: Option<String>,
+    pub created_by: Option<String>,
+    pub created_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ListAttachmentsInput {
+    pub target_type: String,
+    pub target_id: String,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AddPermissionInput {
+    pub policy_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resources: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub actions: Option<Vec<String>>,
+}
+
+pub type RemovePermissionInput = AddPermissionInput;
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct RegisterMcpServerInput {
     pub workspace_id: String,
     pub name: String,

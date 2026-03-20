@@ -1,6 +1,6 @@
 [package]
 name = "authora"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 rust-version = "1.70"
 description = "Official Rust SDK for the Authora agent authorization platform"

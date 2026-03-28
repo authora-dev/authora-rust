@@ -1,12 +1,12 @@
 [package]
 name = "authora"
-version = "0.4.1"
+version = "0.4.2"
 edition = "2021"
 rust-version = "1.70"
 description = "Official Rust SDK for the Authora agent authorization platform"
 license = "MIT"
 readme = "README.md"
-homepage = "https://authora.dev"
+homepage = "https://authora.dev/developers/sdk/rust"
 documentation = "https://authora.dev/developers/sdk/rust"
 repository = "https://github.com/authora-dev/authora-rust"
 keywords = ["authora", "authorization", "agents", "sdk"]

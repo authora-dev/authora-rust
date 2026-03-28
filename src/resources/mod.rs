@@ -14,3 +14,4 @@ pub mod workspaces;
 pub mod user_delegations;
 pub mod approvals;
 pub mod credits;
+pub mod agent_groups;

@@ -1516,3 +1516,97 @@ pub struct CreditCheckoutInput {
 pub struct CreditCheckoutResult {
     pub url: Option<String>,
 }
+
+// -- Agent Groups --
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PolicyPrincipals {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub roles: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agents: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspaces: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_groups: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AgentGroup {
+    pub id: Option<String>,
+    pub workspace_id: Option<String>,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub member_count: Option<u64>,
+    pub created_by: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AgentGroupMember {
+    pub group_id: Option<String>,
+    pub agent_id: Option<String>,
+    pub added_by: Option<String>,
+    pub added_at: Option<String>,
+    pub agent_name: Option<String>,
+    pub agent_status: Option<String>,
+    pub agent_tags: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateAgentGroupInput {
+    pub workspace_id: String,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ListAgentGroupsInput {
+    pub workspace_id: String,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateAgentGroupInput {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AddMembersInput {
+    pub agent_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RemoveMembersInput {
+    pub agent_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct BulkAssignRoleInput {
+    pub role_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BulkAssignRoleResult {
+    pub assigned_count: Option<u64>,
+}

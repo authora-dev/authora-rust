@@ -117,8 +117,9 @@ that borrows the underlying HTTP client:
 | `client.approvals()`  | Approval Challenges  | 13        |
 | `client.credits()`    | Credit Balance       | 3         |
 | `client.user_delegations()` | User Delegation Grants | 11  |
+| `client.agent_groups()`    | Agent Groups           | 8   |
 
-**Total: 90 endpoints**
+**Total: 98 endpoints**
 
 ## Examples
 
@@ -184,6 +185,28 @@ let policy = client.policies().create(CreatePolicyInput {
     actions: vec!["delete".into()],
     ..Default::default()
 }).await?;
+```
+
+### Agent Groups
+
+```rust
+use authora::types::{CreateAgentGroupInput};
+
+// Create a group and add members
+let group = client.agent_groups().create(CreateAgentGroupInput {
+    workspace_id: "ws_456".into(), name: "billing-agents".into(),
+    ..Default::default()
+}).await?;
+client.agent_groups().add_members(&group.id, vec!["agt_abc".into(), "agt_def".into()]).await?;
+
+// List members and groups
+let members = client.agent_groups().list_members(&group.id).await?;
+let groups = client.agents().list_groups("agt_abc").await?;
+
+// Bulk assign role by tag
+client.agents().bulk_assign_role("role_123", None, Some(vec!["production".into()])).await?;
+
+// Policies can target agentGroups and agentTags in principals
 ```
 
 ## Error handling

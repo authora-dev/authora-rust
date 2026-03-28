@@ -95,6 +95,18 @@ impl HttpClient {
         self.handle_response(resp).await
     }
 
+    pub async fn delete_with_body<B: Serialize, R: DeserializeOwned>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<R, AuthoraError> {
+        let resp = self.request_with_body(Method::DELETE, path)
+            .json(body)
+            .send()
+            .await;
+        self.handle_response(resp).await
+    }
+
     async fn handle_response<R: DeserializeOwned>(
         &self,
         result: Result<reqwest::Response, reqwest::Error>,

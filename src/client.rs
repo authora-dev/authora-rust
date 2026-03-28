@@ -21,6 +21,7 @@ use crate::resources::webhooks::WebhooksResource;
 use crate::resources::workspaces::WorkspacesResource;
 use crate::resources::approvals::ApprovalsResource;
 use crate::resources::credits::CreditsResource;
+use crate::resources::agent_groups::AgentGroupsResource;
 use crate::types::{
     ActivateAgentInput, Agent, AgentVerification, CreateAgentInput,
 };
@@ -198,6 +199,12 @@ impl AuthoraClient {
 
     pub fn credits(&self) -> CreditsResource {
         CreditsResource {
+            http: Arc::clone(&self.http),
+        }
+    }
+
+    pub fn agent_groups(&self) -> AgentGroupsResource {
+        AgentGroupsResource {
             http: Arc::clone(&self.http),
         }
     }

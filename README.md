@@ -1,11 +1,29 @@
 # Authora Rust SDK
 
-Official Rust client library for the [Authora](https://authora.dev) agent authorization platform.
+Authorization for AI agents -- identity, permissions, and delegation management.
 
-## Requirements
+## Quick Start
 
-- Rust 2021 edition (MSRV 1.70)
-- Async runtime: [Tokio](https://tokio.rs)
+```rust
+// In Cargo.toml: authora = "0.4", tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+use authora::{AuthoraClient, types::{CreateAgentInput, CheckPermissionInput}};
+
+#[tokio::main]
+async fn main() -> Result<(), authora::AuthoraError> {
+    let client = AuthoraClient::new("authora_live_...")?;
+
+    // Check a permission
+    let result = client.permissions().check(CheckPermissionInput {
+        agent_id: "agt_abc".into(),
+        resource: "files:reports/*".into(),
+        action: "read".into(),
+        ..Default::default()
+    }).await?;
+
+    println!("{}", if result.allowed == Some(true) { "Access granted" } else { "Denied" });
+    Ok(())
+}
+```
 
 ## Installation
 
@@ -13,24 +31,33 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-authora = "0.2"
+authora = "0.4"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
 
-## Find your credentials
+## Getting Credentials
 
-Several SDK methods require identifiers that are generated when you sign up:
+**Automatic (IDE agents):** If you use Claude Code, Cursor, or OpenCode, credentials are created automatically on first run via browser sign-in. See [self-onboarding instructions](https://authora.dev/llms-onboard.txt).
+
+**Manual:** Sign up at [authora.dev/get-started](https://authora.dev/get-started), then find your credentials:
 
 | Value | Format | Where to find it |
 |---|---|---|
-| **API Key** | `authora_live_...` | [Account page](https://www.authora.dev/account) > API Keys tab |
-| **Workspace ID** | `ws_...` | [Account page](https://www.authora.dev/account) > Profile tab > SDK Quick Start |
-| **User ID** | `usr_...` | [Account page](https://www.authora.dev/account) > Profile tab > User ID |
-| **Organization ID** | `org_...` | [Account page](https://www.authora.dev/account) > Profile tab > Organization ID |
+| **API Key** | `authora_live_...` | [Dashboard](https://client.authora.dev) > API Keys |
+| **Workspace ID** | `ws_...` | [Dashboard](https://client.authora.dev) > Settings |
+| **User ID** | `usr_...` | [Dashboard](https://client.authora.dev) > Settings |
+| **Organization ID** | `org_...` | [Dashboard](https://client.authora.dev) > Settings |
+
+**Environment variables (Docker/CI):** Set `AUTHORA_API_KEY`, `AUTHORA_AGENT_ID`, `AUTHORA_ORG_ID`, `AUTHORA_WORKSPACE_ID`.
 
 The `created_by` parameter used when creating agents or API keys is your **User ID** (`usr_...`).
 
-## Quick start
+## Requirements
+
+- Rust 2021 edition (MSRV 1.70)
+- Async runtime: [Tokio](https://tokio.rs)
+
+## Extended Quick Start
 
 ```rust
 use authora::{AuthoraClient, types::CreateAgentInput};
